@@ -30,8 +30,7 @@ class BaseRequest:
 		return string.encode('base64', 'strict')
 
 	def buildHeader(self, data=None):
-		authorization = data or self.buildString()
-		authorization = 'Basic ' + authorization
+		authorization = data or 'Basic ' + self.buildString()
 		user_agent = 'Dat App'
 		return {
 			'Authorization': authorization,
@@ -44,8 +43,7 @@ class Auth(BaseRequest):
 		headers['Authorization'] = headers['Authorization'].replace('\n', '')
 		r = requests.post(self.resource, headers=headers, data={'grant_type': 'client_credentials'})
 		response = r.json()
-		headers['Authorization'] = 'Bearer ' + response['access_token']
-		return headers
+		return self.buildHeader('Bearer ' + response['access_token'])
 
 
 class Tweets(BaseRequest):
