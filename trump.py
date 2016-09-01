@@ -1,8 +1,13 @@
 import requests
+import time
 from config import config
 
 base_url = 'https://api.twitter.com/'
 limit = 200
+upper_limit = limit
+screen_name = 'realDonaldTrump'
+
+hold_time = 5
 
 class Punctuation:
 	items = {
@@ -60,18 +65,20 @@ auth = Auth(base_url, 'oauth2/token', config)
 auth_obj = auth.get()
 
 count = Count(base_url, '1.1/users/show.json', auth_obj)
-num = count.get('axschech')
+num = count.get(screen_name)
+#num = 1000
 
 tweets = Tweets(base_url, '1.1/statuses/user_timeline.json', auth.get())
-collection = tweets.get('axschech')
-i = 0
-for item in collection:
-	i = i + 1
-	try:
-		item['retweeted_status']
-		item['quoted_status']
-	except Exception, e:
-		parser.count(item['text'])
-
-print parser.items
+while (upper_limit < num):
+	collection = tweets.get(screen_name)
+	for item in collection:
+		try:
+			item['retweeted_status']
+			item['quoted_status']
+		except Exception, e:
+			parser.count(item['text'])
+	upper_limit = upper_limit + limit
+	print str(upper_limit) + "\n"
+	print parser.items
+	time.sleep(5)
 
