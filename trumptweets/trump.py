@@ -96,13 +96,15 @@ class Auth(BaseRequest):
 class Tweets(BaseRequest):
     payload = {
         'screen_name': screen_name,
-        'count': limit
+        'count': limit,
+        'max_id': 711042337158340608
     }
 
     def get(self, screen_name):
         r = requests.get(self.resource, params=self.payload, headers=self.config)
         tweets = r.json()
-        self.payload['max_id'] = tweets[-1]['id']
+        self.payload['max_id'] = int(tweets[-1]['id_str'])
+        print self.payload['max_id']
         return tweets
 
 class Count(BaseRequest):
@@ -119,10 +121,14 @@ auth_obj = auth.get()
 count = Count(base_url, '1.1/users/show.json', auth_obj)
 num = count.get(screen_name)
 #num = 1000
-
+i = 0
 tweets = Tweets(base_url, '1.1/statuses/user_timeline.json', auth_obj)
 while (upper_limit < num):
     collection = tweets.get(screen_name)
+    i = i + 1
+    print "\n**************\n"
+    print i
+    print "\n**************\n"
     for item in collection:
         try:
             item['retweeted_status']
@@ -130,8 +136,9 @@ while (upper_limit < num):
         except Exception, e:
             print item['text']
             parser.count(item)
-    print str(upper_limit) + "\n"
-    print parser.items
+    # print str(upper_limit) + "\n"
+    # print parser.items
     upper_limit = upper_limit + limit
-    time.sleep(60)
+    time.sleep(5)
+
 
