@@ -16,19 +16,52 @@ class Punctuation:
         ',': 0,
         '.': 0,
         "'": 0,
+        "last": 0,
         'none': 0,
-        'total': 0
+        'total': 0,
+        'device': {
+            'iphone': 0,
+            'web': 0,
+            'android': 0,
+            'iPad': 0
+        }
     }
-    def count(self, string):
+    def device(self, string):
+        if 'iphone' in string:
+            return 'iphone'
+        if 'android' in string:
+            return 'android'
+        if 'Web' in string:
+            return 'web'
+        if 'iPad' in string:
+            return 'iPad'
+        if 'Ads' in string:
+            return False
+        if 'Periscope' in string:
+            return False
+        if 'Studio' in string:
+            return False
+        if 'Instagram' in string:
+            return False
+        print string
+        exit()
+
+    def count(self, tweet):
+        string = tweet['text']
+        source = tweet['source']
+        if self.device(source) is False:
+            return
         found = False
         for key, val in self.items.iteritems():
-            if key in ['none', 'total']:
+            if key in ['none', 'total', 'last', 'device']:
                 continue
             if found is False and string.count(key) is not 0:
                 self.items[key] = val + string.count(key)
                 found = True
         if found is False:
             self.items['none'] = self.items['none'] + 1
+        # print self.device(source)
+        self.items['device'][self.device(source)] =  self.items['device'][self.device(source)] + 1
         self.items['total'] = self.items['total'] + 1
 
 class BaseRequest:
@@ -95,9 +128,10 @@ while (upper_limit < num):
             item['retweeted_status']
             item['quoted_status']
         except Exception, e:
-            parser.count(item['text'])
+            print item['text']
+            parser.count(item)
     print str(upper_limit) + "\n"
     print parser.items
     upper_limit = upper_limit + limit
-    time.sleep(5)
+    time.sleep(60)
 
