@@ -10,13 +10,16 @@ screen_name = 'realDonaldTrump'
 hold_time = 5
 
 class Punctuation:
-    items = {
+    symbols = {
         '!': 0,
         '?': 0,
         ',': 0,
         '.': 0,
-        "'": 0,
-        "last": 0,
+        "'": 0
+    }
+    items = {
+        'symbols': symbols.copy(),
+        'last': symbols.copy(),
         'none': 0,
         'total': 0,
         'device': {
@@ -52,12 +55,14 @@ class Punctuation:
         if self.device(source) is False:
             return
         found = False
-        for key, val in self.items.iteritems():
-            if key in ['none', 'total', 'last', 'device']:
-                continue
-            if found is False and string.count(key) is not 0:
-                self.items[key] = val + string.count(key)
+        for key, val in self.items['symbols'].iteritems():
+            if string.count(key) is not 0:
+                self.items['symbols'][key] = val + string.count(key)
+                if string.endswith(key):
+                    self.items['last'][key] = val + 1
+
                 found = True
+
         if found is False:
             self.items['none'] = self.items['none'] + 1
         # print self.device(source)
@@ -96,15 +101,20 @@ class Auth(BaseRequest):
 class Tweets(BaseRequest):
     payload = {
         'screen_name': screen_name,
-        'count': limit,
-        'max_id': 711042337158340608
+        'count': limit
     }
 
     def get(self, screen_name):
         r = requests.get(self.resource, params=self.payload, headers=self.config)
         tweets = r.json()
+        try:
+            if self.payload['max_id'] == int(tweets[-1]['id_str']):
+                print tweets
+                print 'this is happening naow'
+                return False
+        except:
+            pass
         self.payload['max_id'] = int(tweets[-1]['id_str'])
-        print self.payload['max_id']
         return tweets
 
 class Count(BaseRequest):
@@ -123,8 +133,12 @@ num = count.get(screen_name)
 #num = 1000
 i = 0
 tweets = Tweets(base_url, '1.1/statuses/user_timeline.json', auth_obj)
-while (upper_limit < num):
+check = True
+while (upper_limit < num and check == True):
     collection = tweets.get(screen_name)
+    if collection == False:
+        check = False
+        collection = []
     i = i + 1
     print "\n**************\n"
     print i
@@ -134,10 +148,9 @@ while (upper_limit < num):
             item['retweeted_status']
             item['quoted_status']
         except Exception, e:
-            print item['text']
             parser.count(item)
     # print str(upper_limit) + "\n"
-    # print parser.items
+    print parser.items
     upper_limit = upper_limit + limit
     time.sleep(5)
 
