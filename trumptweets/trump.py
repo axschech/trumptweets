@@ -34,7 +34,7 @@ class Punctuation:
             return 'iphone'
         if 'android' in string:
             return 'android'
-        if 'Web' in string:
+        if 'Web' or 'TweetDeck' in string:
             return 'web'
         if 'iPad' in string:
             return 'iPad'
@@ -59,8 +59,11 @@ class Punctuation:
             if string.count(key) is not 0:
                 self.items['symbols'][key] = val + string.count(key)
                 if string.endswith(key):
+                    try:
+                        self.items['last']['total'] = self.items['last']['total'] + 1
+                    except:
+                        self.items['last']['total'] = 0
                     self.items['last'][key] = val + 1
-
                 found = True
 
         if found is False:
